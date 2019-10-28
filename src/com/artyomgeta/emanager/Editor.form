@@ -73,18 +73,21 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="edd28" class="javax.swing.JButton" binding="closeConsoleButton">
+          <component id="67b60" class="javax.swing.JButton" binding="button1" default-binding="true">
             <constraints border-constraint="East"/>
             <properties>
               <text value="Button"/>
             </properties>
           </component>
-          <scrollpane id="485e3">
+          <vspacer id="97568">
+            <constraints border-constraint="North"/>
+          </vspacer>
+          <scrollpane id="8a0f0">
             <constraints border-constraint="Center"/>
             <properties/>
             <border type="none"/>
             <children>
-              <component id="d2d64" class="javax.swing.JTextArea" binding="textArea2" default-binding="true">
+              <component id="da519" class="javax.swing.JTextArea" binding="textArea2" default-binding="true">
                 <constraints/>
                 <properties/>
               </component>
@@ -173,10 +176,17 @@
                     </properties>
                     <border type="none"/>
                     <children>
-                      <component id="721d8" class="javax.swing.JList" binding="list1" default-binding="true">
+                      <scrollpane id="b3d8b">
                         <constraints border-constraint="Center"/>
                         <properties/>
-                      </component>
+                        <border type="none"/>
+                        <children>
+                          <component id="9301c" class="javax.swing.JList" binding="list1" default-binding="true">
+                            <constraints/>
+                            <properties/>
+                          </component>
+                        </children>
+                      </scrollpane>
                     </children>
                   </grid>
                   <grid id="7f47f" binding="audioPanel" layout-manager="BorderLayout" hgap="0" vgap="0">

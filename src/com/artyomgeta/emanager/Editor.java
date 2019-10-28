@@ -1,12 +1,12 @@
 package com.artyomgeta.emanager;
 
 import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -18,7 +18,6 @@ public class Editor extends JFrame {
     private JButton toolBarButton1;
     private JTextField textField1;
     private JTextArea textArea1;
-    private JTextArea textArea2;
     private JButton toolBarButton2;
     private JButton toolBarButton3;
     private JButton toolBarButton4;
@@ -43,13 +42,15 @@ public class Editor extends JFrame {
     private JPanel audioPanel;
     private JPanel presentationPanel;
     private JPanel peoplePanel;
-    private JList list1;
+    private JList<String> list1;
     private JTree tree1;
     private JList list2;
     private JTree tree2;
     private JList list3;
     private JList list4;
     private JButton saveButton;
+    private JButton button1;
+    private JTextArea textArea2;
     private JToolBar openToolToolBar;
     private JMenuBar menuBar = new JMenuBar();
     private JMenu fileMenu = new JMenu("File");
@@ -66,6 +67,8 @@ public class Editor extends JFrame {
 
     String scenarioText = "Scenario";
     String projectName;
+
+    DefaultListModel<String> scenarioModel = new DefaultListModel<>();
 
     public Editor(String projectName) throws Exception {
         this.projectName = projectName;
@@ -110,7 +113,7 @@ public class Editor extends JFrame {
         consolePanel.setBorder(BorderFactory.createBevelBorder(1));
     }
 
-    @SuppressWarnings("CodeBlock2Expr")
+    @SuppressWarnings({"CodeBlock2Expr", "MagicConstant"})
     public void setDefault() {
         //toolPanel.setVisible(false);
         boolean toolsIsVisible = false;
@@ -122,29 +125,32 @@ public class Editor extends JFrame {
         addToListButton.setText("");
         removeFromList.setText("");
         closeListButton.setText(null);
-        closeConsoleButton.setText(null);
         closeToolButton.setText(null);
         closeToolButton.setIcon(EventManager.resizeIcon(new ImageIcon("images/x2.png"), 20, 20));
-        closeConsoleButton.setIcon(EventManager.resizeIcon(new ImageIcon("images/x2.png"), 20, 20));
         closeListButton.setIcon(EventManager.resizeIcon(new ImageIcon("images/x2.png"), 20, 20));
         addToListButton.setIcon(EventManager.resizeIcon(new ImageIcon("images/plus.png"), 25, 20));
         removeFromList.setIcon(EventManager.resizeIcon(new ImageIcon("images/minus.png"), 25, 20));
 
         closeToolButton.addActionListener(e -> {
-                toolPanel.setVisible(false);
+            toolPanel.setVisible(false);
         });
         closeListButton.addActionListener(e -> {
-                mainListPanel.setVisible(false);
-        });
-        closeConsoleButton.addActionListener(e -> {
-                consolePanel.setVisible(false);
+            mainListPanel.setVisible(false);
         });
         tree1.setLeadSelectionPath(new TreePath(Objects.requireNonNull(new File("Projects/" + projectName + "/Tabs/Audio").listFiles())));
+
+        list1.setModel(scenarioModel);
 
         toolPanel.setVisible(false);
         addToListButton.addActionListener(e -> {
             toolPanel.setVisible(true);
+            int tab = tabbedPane1.getSelectedIndex();
+            if (tab == 0) {
+                scenarioModel.addElement(("New element" + countElements(scenarioModel)).replace("t0", "t"));
+                list1.setSelectedIndex(countElements(scenarioModel) - 1);
+            }
         });
+
         menuBar.add(fileMenu);
         menuBar.add(projectMenu);
         menuBar.add(viewMenu);
@@ -167,70 +173,149 @@ public class Editor extends JFrame {
         toolPanelViewMenu.addActionListener(e -> toolPanel.setVisible(true));
         consolePanelViewMenu.addActionListener(e -> consolePanel.setVisible(true));
 
-        String[] presentationRoot = new String[] { "Presentation" };
-        String[] audioRoot = new String[] { "Audio" };
+        consolePanel.setVisible(false);
 
+        removeFromList.addActionListener(e ->
+
+        {
+            int tab = tabbedPane1.getSelectedIndex();
+
+            if (tab == 0 && !list1.isSelectionEmpty()) {
+                removeListElement(list1.getSelectedValue().toString());
+            } else if (tab == 1 && !list2.isSelectionEmpty()) {
+                removeListElement(list2.getSelectedValue().toString());
+            } else if (tab == 2 && !list3.isSelectionEmpty()) {
+                removeListElement(list3.getSelectedValue().toString());
+            } else if (tab == 3 && !list4.isSelectionEmpty()) {
+                removeListElement(list4.getSelectedValue().toString());
+            }
+        });
+        removeFromList.setEnabled(false);
+
+        closeProjectFileMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
+        toolPanelViewMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, ActionEvent.ALT_MASK));
+        listPanelViewMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.ALT_MASK));
+        consolePanelViewMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK));
+
+        closeProjectFileMenu.addActionListener(e -> {
+            try {
+                new Projects().run();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            dispose();
+        });
+
+        String[] presentationRoot = new String[]{"Presentation"};
+        String[] audioRoot = new String[]{"Audio"};
+
+        String[] data = new String[]{Arrays.toString(presentationRoot)};
+    }
+
+    private void removeListElement(String name) {
 
     }
 
     // Модель данных дерева
-    class SimpleModel implements TreeModel {
+    /*class SimpleModel implements TreeModel
+    {
         // Список потомков корневой записи
         private ArrayList<String> rootList = new ArrayList<String>();
         // Дочерние узлы первого уровня
         private ArrayList<String>[] tnodes;
 
         @SuppressWarnings("unchecked")
-        public SimpleModel(String[] type) {
+        public SimpleModel()
+        {
             // Заполнение списков данными
-            tnodes = (ArrayList<String>[]) new ArrayList<?>[type.length];
-            for (int i = 0; i < type.length; i++) {
-                rootList.add(type[i]);
+            tnodes = (ArrayList<String>[]) new ArrayList<?>[tnodes.length];
+            for (int i = 0; i < tnodes.length; i++) {
+                rootList.add(nodes[i]);
                 tnodes[i] = new ArrayList<String>();
-                /*for (int j = 0; j < leafs[i].length; j++) {
+                for (int j = 0; j < leafs[i].length; j++) {
                     tnodes[i].add(leafs[i][j]);
-                }*/
+                }
             }
         }
-
+        // Функция получения корневого узла дерева
         @Override
         public Object getRoot() {
-            return null;
+            return root;
         }
-
-        @Override
-        public Object getChild(Object parent, int index) {
-            return null;
+        // Функция получения потомка корневого узла
+        private final int getRootChild(Object node)
+        {
+            int idx = -1;
+            for (int i = 0; i < rootList.size(); i++){
+                if (rootList.get(i) == node) {
+                    idx = i;
+                    break;
+                }
+            }
+            return idx;
         }
-
+        // Функция получения количество потомков узла
         @Override
-        public int getChildCount(Object parent) {
+        public int getChildCount(Object node)
+        {
+            int idx = getRootChild(node);
+            if ( node == root )
+                return rootList.size();
+            else if ( node == rootList.get(idx))
+                return tnodes[idx].size();
             return 0;
         }
-
+        // Функция получения потомка узла по порядковому номеру
         @Override
-        public boolean isLeaf(Object node) {
-            return false;
+        public Object getChild(Object node, int index)
+        {
+            int idx = getRootChild(node);
+            if ( node == root )
+                return rootList.get(index);
+            else if ( node == rootList.get(idx))
+                return tnodes[idx].get(index);
+            return null;
         }
-
+        // Функция получения порядкового номера потомка
         @Override
-        public void valueForPathChanged(TreePath path, Object newValue) {
-
-        }
-
-        @Override
-        public int getIndexOfChild(Object parent, Object child) {
+        public int getIndexOfChild(Object node, Object child)
+        {
+            int idx = getRootChild(node);
+            if ( node == root )
+                return rootList.indexOf(child);
+            else if ( node == rootList.get(idx))
+                return tnodes[idx].indexOf(child);
             return 0;
         }
-
+        // Функция определения, является ли узел листом
         @Override
-        public void addTreeModelListener(TreeModelListener l) {
-
+        public boolean isLeaf(Object node)
+        {
+            int idx = getRootChild(node);
+            if ((idx >= 0) && tnodes[idx].contains(node))
+                return true;
+            else
+                return false;
         }
-
+        // Функция вызывается при изменении значения некоторого узла
         @Override
-        public void removeTreeModelListener(TreeModelListener l) {
+        public void valueForPathChanged(TreePath path, Object value) {}
+        // Метод присоединения слушателя
+        @Override
+        public void addTreeModelListener(TreeModelListener tml) {}
+        // Методы удаления слушателя
+        @Override
+        public void removeTreeModelListener(TreeModelListener tml) {}
+    }*/
 
-        }
+    private int countElements(DefaultListModel defaultListModel) {
+        return defaultListModel.getSize();
     }
+
+
+    private boolean listElementSelected(JList list) {
+        System.out.println("Works" + !list.isSelectionEmpty());
+        return !list.isSelectionEmpty();
+    }
+
 }
