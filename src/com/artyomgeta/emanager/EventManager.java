@@ -1,22 +1,31 @@
 package com.artyomgeta.emanager;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class EventManager {
     String eManagerLabelText = "Event Manager";
 
-    public static String[] returnProjects() {
-        File[] files = new File("Projects/").listFiles();
-        String[] names = {"No projects found"};
-        for (int i = 0; i < files.length; i++) {
-            names[i] = files[i].getName();
+    public static String[] returnProjects() throws NullPointerException {
+        try {
+            File[] files = new File("Projects/").listFiles();
+            String[] names = new String[files.length];
+            if (files.length == 0) {
+                return new String[]{"No projects found"};
+            }
+            for (int i = 0; i < files.length; i++) {
+                names[i] = files[i].getName();
+            }
+            return names;
+        } catch (NullPointerException e) {
+            new File("Projects/").mkdir();
+            return new String[]{"No projects found"};
         }
-        return names;
     }
 
     public static void launchMessage() throws InterruptedException {
@@ -59,6 +68,39 @@ public class EventManager {
         Image img = icon.getImage();
         Image resizedImage = img.getScaledInstance(resizedWidth, resizedHeight, java.awt.Image.SCALE_SMOOTH);
         return new ImageIcon(resizedImage);
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static void createNewProject(String name, String date, String description) {
+        new File("Projects/" + name.replace(" ", "_")).mkdirs();
+        new File("Projects/" + name.replace(" ", "_") + "/Tabs").mkdirs();
+        new File("Projects/" + name.replace(" ", "_") + "/Tabs/Scenario").mkdirs();
+        new File("Projects/" + name.replace(" ", "_") + "/Tabs/Presentations").mkdirs();
+        new File("Projects/" + name.replace(" ", "_") + "/Tabs/Audio").mkdirs();
+        new File("Projects/" + name.replace(" ", "_") + "/Tabs/People").mkdirs();
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(new File("Projects/" + name.replace(" ", "_") + "/Information.json"));
+            JSONArray jsonArray = new JSONArray();
+            JSONObject jsonObject = new JSONObject();
+            JSONObject jsonObject1 = new JSONObject();
+            JSONObject jsonObject2 = new JSONObject();
+            jsonObject.put("name", name);
+            jsonObject1.put("date", date);
+            jsonObject2.put("description", description);
+            jsonArray.put(jsonObject);
+            jsonArray.put(jsonObject1);
+            jsonArray.put(jsonObject2);
+            fileWriter.write(jsonArray.toString());
+            fileWriter.close();
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean findProject(String name) {
+        if (new File("Projects/" + name).isDirectory()) return true;
+        else return false;
     }
 
     public static void main(String[] args) throws InterruptedException {

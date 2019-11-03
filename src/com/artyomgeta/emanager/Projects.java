@@ -2,17 +2,18 @@ package com.artyomgeta.emanager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Projects extends JFrame {
     private JPanel panel1;
     private JButton createNewProjectButton;
     private JList<String> list1;
-    private JButton button2;
+    private JButton optionsButton;
     private JButton importButton;
     private JTextArea textArea1;
-    private JButton button3;
-    private JButton button4;
+    private JButton givePatreonButton;
+    private JButton getHelpButton;
     private JPanel toolPanel;
     private JPanel workPanel;
     private JPanel buttonsPanel;
@@ -21,6 +22,7 @@ public class Projects extends JFrame {
     private JPanel inputPanel;
     private JLabel eManagerLabel;
     private JButton openButton;
+    private JButton deleteButton;
 
     public Projects() throws Exception {
         setDefault();
@@ -39,17 +41,12 @@ public class Projects extends JFrame {
         buttonsPanel.setBorder(BorderFactory.createBevelBorder(1));
     }
     private void setDefault() {
-        AtomicBoolean inputPanelIsVisible = new AtomicBoolean(false);
         inputPanel.setVisible(false);
         inputPanel.setBorder(BorderFactory.createBevelBorder(1));
         createNewProjectButton.addActionListener(e -> {
-            if(!inputPanelIsVisible.get()) {
+            inputPanel.setVisible(false);
                 inputPanel.setVisible(true);
-                inputPanelIsVisible.set(true);
-            } else {
-                inputPanel.setVisible(false);
-                inputPanelIsVisible.set(false);
-            }
+            deleteButton.setVisible(false);
         });
         importButton.addActionListener(e -> {
             try {
@@ -59,7 +56,10 @@ public class Projects extends JFrame {
                 JOptionPane.showMessageDialog(this, "An error occupied!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-        eManagerLabel.setText("<html><b>Event</b> Manager</html>");
+        deleteButton.addActionListener(e -> {
+
+        });
+        eManagerLabel.setText("Event Manager");
 
         list1.addListSelectionListener(e -> {
             inputPanel.setVisible(true);
@@ -67,14 +67,21 @@ public class Projects extends JFrame {
             nameField.setEditable(false);
         });
         openButton.addActionListener(e -> {
-            try {
-                new Editor(nameField.getText()).run();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "An error occupied!", "Error", JOptionPane.ERROR_MESSAGE);
+            EventManager.createNewProject(nameField.getText(), textField2.getText(), textArea1.getText());
+            if (EventManager.findProject(nameField.getText())) {
+                try {
+                    new Editor(nameField.getText()).run();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "No project found!", "Error", JOptionPane.ERROR_MESSAGE);
             }
+            dispose();
         });
         list1.setListData(EventManager.returnProjects());
+        if (EventManager.returnProjects()[0].equals("No projects found"))
+            list1.setEnabled(false);
     }
 
 }

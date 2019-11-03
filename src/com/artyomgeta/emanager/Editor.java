@@ -137,7 +137,7 @@ public class Editor extends JFrame {
         closeListButton.addActionListener(e -> {
             mainListPanel.setVisible(false);
         });
-        tree1.setLeadSelectionPath(new TreePath(Objects.requireNonNull(new File("Projects/" + projectName + "/Tabs/Audio").listFiles())));
+        //tree1.setLeadSelectionPath(new TreePath(Objects.requireNonNull(new File("Projects/" + projectName + "/Tabs/Audio").listFiles())));
 
         list1.setModel(scenarioModel);
 
